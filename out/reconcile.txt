@@ -1,0 +1,130 @@
+
+== Record types in the log
+  5121  extensions.update_campaign_call_result  'PATCH campaign call result'  http=200
+  3185  extensions.update_campaign_call_result  'PATCH campaign call result failed'  http=None
+  2542  extensions.fetch_url  'POST https://api.kalkulio.example/callbot/calls'  http=200
+  1611  extensions.fetch_url  'status delivery skipped: could not load call record from outbound-api'  http=None
+   140  extensions.fetch_url  'POST https://api.kalkulio.example/callbot/calls (manual retry)'  http=200
+    97  extensions.update_entity  'skipping entity update'  http=None
+
+== Number 1: 4,000 leads
+rows in leads_sent.csv: 4000  distinct ids: 4000
+products: {'auto': 4000}
+ids in logs not in csv: 0
+leads with no call at all: 303
+  of which created >= 17:00 UTC (19:00 Warsaw): 296
+  earliest createdAt among them: 2026-09-29T16:58:14.894Z
+  latest createdAt of a called lead: 2026-09-29T16:57:33.226Z
+last status POST in log: 2026-09-29T17:01:29.657Z
+
+== Number 2: 2,474 leads with a status
+leads with >=1 delivered status (bot or manual): 2474
+leads called but no status delivered: 1223
+  delivered by the bot: 2344  only via the manual resend: 130
+4000 - 2474 = 1526 = 1223 (called, status lost) + 303 (not called yet)
+
+== Number 3: 5,121 'status updates'
+successful internal PATCH call-result to outbound-api: 5121
+  IN_PROGRESS: 2548  final result: 2573
+failed internal PATCH: 3185
+calls (conversations): 4153
+status POSTs to Kalkulio: bot ok 2542  bot skipped (failed) 1611  manual resend 140
+successful POSTs to Kalkulio total: 2682
+every call has 1 IN_PROGRESS + 1 result PATCH line and exactly 1 status line: True
+status in the Kalkulio payload differs from the PATCH result: 0
+items per POST: {1: 4293}
+status items Kalkulio would reject (missing field or unknown id): 0
+failure reasons: {'socket hang up': 508, 'Connection refused': 548, 'All connection attempts failed': 555}
+failed deliveries between 2026-09-29T09:02:02.915Z and 2026-09-29T11:04:55.606Z
+failed by hour UTC: {'09': 746, '10': 811, '11': 54}
+
+== Manual resend at ~13:00 UTC
+manual resends: 140  distinct: 140  all match a failed call: True  window: 2026-09-29T13:04:00.000Z - 2026-09-29T13:07:56.300Z
+leads where the manual resend replaced a NEWER status in their CRM: 7
+  A-100679: real latest ANSWERED_INTERESTED (attempt 2, delivered 11:08:29) -> CRM now shows NO_ANSWER (attempt 1, resent 13:04:17)
+  A-100695: real latest NO_ANSWER (attempt 2, delivered 11:10:43) -> CRM now shows NO_ANSWER (attempt 1, resent 13:04:32)
+  A-100710: real latest NO_ANSWER (attempt 2, delivered 11:05:43) -> CRM now shows NO_ANSWER (attempt 1, resent 13:05:01)
+  A-100746: real latest CALLBACK_REQUESTED (attempt 2, delivered 11:18:41) -> CRM now shows BUSY (attempt 1, resent 13:05:38)
+  A-100805: real latest ANSWERED_NOT_INTERESTED (attempt 2, delivered 11:17:38) -> CRM now shows NO_ANSWER (attempt 1, resent 13:07:01)
+  A-100811: real latest CALLBACK_REQUESTED (attempt 2, delivered 11:06:28) -> CRM now shows NO_ANSWER (attempt 1, resent 13:07:22)
+  A-100820: real latest ANSWERED_INTERESTED (attempt 2, delivered 11:06:58) -> CRM now shows NO_ANSWER (attempt 1, resent 13:07:32)
+  of which the visible status differs: 5
+
+== Per-lead delivery patterns (called leads)
+  1893  ((1, 'ok'),)
+  1223  ((1, 'lost'),)
+   198  ((1, 'ok'), (2, 'ok'))
+   185  ((1, 'lost'), (2, 'ok'))
+   125  ((1, 'manual'),)
+    58  ((1, 'ok'), (2, 'lost'))
+     7  ((1, 'manual'), (2, 'ok'))
+     5  ((1, 'manual'), (2, 'lost'))
+     3  ((1, 'ok'), (2, 'manual'))
+
+== What is still missing (input for the redelivery tool)
+leads whose newest status never arrived: 1286
+  of which lead has no status at all: 1223
+  of which lead shows an older attempt: 63
+  by status: {'ANSWERED_NOT_INTERESTED': 419, 'ANSWERED_INTERESTED': 309, 'NO_ANSWER': 195, 'VOICEMAIL': 169, 'CALLBACK_REQUESTED': 95, 'BUSY': 53, 'WRONG_NUMBER': 46}
+older undelivered statuses superseded by a newer delivered one (do not send): 185
+leads 'with status' that show the wrong one: 63 older attempt + overwritten = 70
+
+== Unrelated: update_entity warnings
+count: 97  errors: {"HTTP 400 {'body.metaData': 'Input should be a valid dictionary'}": 97}
+metaData sent: {'{metadata}': 97}
+call status of those conversations: {'CALLBACK_REQUESTED': 97}
+by hour UTC: {'06': 7, '07': 7, '08': 4, '09': 17, '10': 25, '11': 10, '12': 4, '13': 1, '14': 6, '15': 6, '16': 10}
+all CALLBACK_REQUESTED calls: 278
+
+== Infra (from k8s_and_metrics.txt)
+hour  handler_requests  leads_created
+06      223               223
+07      214               214
+08      227               227
+09      878               878
+10      892               892
+11      224               224
+12      209               209
+13      213               213
+14      222               222
+15      179               179
+16      223               223
+17      196               196
+18      100               100
+handler requests == leads per hour: True
+median normal hour: 222  peak 09-10 avg: 885.0
+
+== Speed to first call
+minutes: median 1.6  max 2.5
+
+== Contract metrics measured on 29 Sep
+1 status delivery: 2542/4153 = 61.2% within 15 min of call end  (bot delivery latency max 10.5 s)
+2 speed to first call: 3697/3697 = 100.0% within 5 min (leads 08:00-18:58 Warsaw)
+
+== Business: day of 29 Sep
+call attempts: 4153  per called lead: 1.123
+our attempt fees: 9,967.20 PLN   same attempts at call center: 39,453.50 PLN   saving: 29,486.30 PLN/day
+contract metric 3 (excl. 120 WRONG_NUMBER leads): 64.9%
+contacted leads: 2320 = 62.8% of called, 58.0% of all
+interested leads: 938 = 40.4% of contacted
+expected margin per interested lead: 16.20 PLN
+per month (21 days): fees 209,311  saving 619,212
+README rates: extra contacts/day vs call center = 4000 x 13pp = 520 -> extra interested 210 -> extra margin 3,406 PLN/day, 71,524/month
+
+== Business: exposure
+Marta: 1526 x 180 = 274680
+interested leads whose INTERESTED status never arrived: 309
+interested leads whose status arrived late via manual resend: 35
+interested leads hidden by the manual overwrite: 2
+upper bound if every one of them is lost: 311 x 16.20 = 5,038.20 PLN
+incl. late manual ones: 346 x 16.20 = 5,605.20 PLN
+callback-requested leads whose status never arrived: 95
+attempts with failed delivery: 1611 x 2.4 = 3,866.40 PLN
+whole day's attempt fees: 9,967.20 PLN
+
+== Household campaign capacity
+normal auto hour ~ 222 req/h; 29 Sep peak 892 req/h -> 14 OOMKills
+auto + household = 1.625 x today's volume, if household has the same daily shape
+  normal hour: 222 -> 361 req/h
+  a peak like 29 Sep: 892 -> 1450 req/h
+  batching every 2 min instead of per lead: at most 30 req/h per campaign

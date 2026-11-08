@@ -1,0 +1,44 @@
+# kubectl -n customer-prod describe pod outbound-api-6d9f7c5b8-x2kqp  (excerpt, 2026-09-29 13:30 UTC)
+Containers:
+  outbound-api:
+    Image:          registry.example/outbound-api:0.0.46
+    State:          Running
+      Started:      Mon, 29 Sep 2026 11:04:51 +0000
+    Last State:     Terminated
+      Reason:       OOMKilled
+      Exit Code:    137
+    Restart Count:  16
+    Limits:
+      cpu:     2500m
+      memory:  800Mi
+    Requests:
+      cpu:     500m
+      memory:  512Mi
+
+# kubectl -n customer-prod get deploy outbound-api
+NAME           READY   UP-TO-DATE   AVAILABLE
+outbound-api   1/1     1            1
+
+# Restart counter: 2 at 2026-09-29 08:55 UTC -> 16 at 11:05 UTC (14 OOMKills). 0 restarts in the previous 7 days.
+# Container RSS steady state 420-470 MiB; spikes above 800 MiB during the window.
+
+# Requests/hour to outbound-api handler handle_partial_update_campaign
+# (each request = load the whole campaign document (~10k numbers), append numbers, save it back)
+# 7-day average before 2026-09-25: 12/h (client pushed leads in batches of ~30 every 30 min)
+# Since 2026-09-25 the client pushes every lead individually in real time (added: 1 per request).
+hour_utc  requests
+06:00     223
+07:00     214
+08:00     227
+09:00     878
+10:00     892
+11:00     224
+12:00     209
+13:00     213
+14:00     222
+15:00     179
+16:00     223
+17:00     196
+18:00     100
+
+# Alerts fired in this window: none (no alert rule on OOMKilled / restart rate exists).

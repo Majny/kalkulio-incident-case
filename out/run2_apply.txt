@@ -1,0 +1,54 @@
+$ python3 tools/redeliver.py --apply
+redeliver 20261108T133125Z-252865  mode: APPLY  api: http://127.0.0.1:8099
+logs: 4000 leads, 3697 called, 1286 with newest status missing per logs
+  checked 250/1286 leads in Kalkulio
+  checked 500/1286 leads in Kalkulio
+  checked 750/1286 leads in Kalkulio
+  checked 1000/1286 leads in Kalkulio
+  checked 1250/1286 leads in Kalkulio
+  sent 50/1286
+  sent 100/1286
+  sent 150/1286
+  sent 200/1286
+  sent 250/1286
+  sent 300/1286
+  sent 350/1286
+  sent 400/1286
+  sent 450/1286
+  sent 500/1286
+  sent 550/1286
+  sent 600/1286
+  sent 650/1286
+  sent 700/1286
+  sent 750/1286
+  sent 800/1286
+  sent 850/1286
+  sent 900/1286
+  sent 950/1286
+  sent 1000/1286
+  sent 1050/1286
+  sent 1100/1286
+  sent 1150/1286
+  sent 1200/1286
+  sent 1250/1286
+  sent 1286/1286
+
+PLAN
+  send: 1286  by status: {'ANSWERED_NOT_INTERESTED': 419, 'ANSWERED_INTERESTED': 309, 'NO_ANSWER': 195, 'VOICEMAIL': 169, 'CALLBACK_REQUESTED': 95, 'BUSY': 53, 'WRONG_NUMBER': 46}
+  not sending:
+      303  not_called_yet
+      185  superseded_by_newer_attempt
+        7  crm_shows_older_status_needs_manual_fix
+  ask Kalkulio to set these by hand (a resend would only be a 'duplicate'):
+    A-100679: should be ANSWERED_INTERESTED (call 2026-09-29T11:04:53.252Z)
+    A-100695: should be NO_ANSWER (call 2026-09-29T11:10:39.467Z)
+    A-100710: should be NO_ANSWER (call 2026-09-29T11:05:37.441Z)
+    A-100746: should be CALLBACK_REQUESTED (call 2026-09-29T11:15:03.258Z)
+    A-100805: should be ANSWERED_NOT_INTERESTED (call 2026-09-29T11:16:54.394Z)
+    A-100811: should be CALLBACK_REQUESTED (call 2026-09-29T11:02:26.163Z)
+    A-100820: should be ANSWERED_INTERESTED (call 2026-09-29T11:05:06.479Z)
+
+RESULT  {'accepted': 1286}   retries: none
+plan: /Users/majny/Desktop/MyProjects/interview-tasks/born-digital/solution/out/redeliver_plan_apply.csv
+log:  /Users/majny/Desktop/MyProjects/interview-tasks/born-digital/solution/out/redeliver_log.jsonl
+(exit 0)
