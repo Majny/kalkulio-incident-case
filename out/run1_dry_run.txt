@@ -1,5 +1,5 @@
 $ python3 tools/redeliver.py 
-redeliver 20261108T132557Z-e8f9af  mode: DRY RUN (nothing will be sent)  api: http://127.0.0.1:8099
+redeliver 20261109T125750Z-3f30b4  mode: DRY RUN (nothing will be sent)  api: http://127.0.0.1:8099
 logs: 4000 leads, 3697 called, 1286 with newest status missing per logs
   checked 250/1286 leads in Kalkulio
   checked 500/1286 leads in Kalkulio
@@ -23,6 +23,7 @@ PLAN
     A-100820: should be ANSWERED_INTERESTED (call 2026-09-29T11:05:06.479Z)
 
 Dry run. Rerun with --apply to send.
-plan: /Users/majny/Desktop/MyProjects/interview-tasks/born-digital/solution/out/redeliver_plan_dry_run.csv
-log:  /Users/majny/Desktop/MyProjects/interview-tasks/born-digital/solution/out/redeliver_log.jsonl
+plan: out/redeliver_plan_dry_run.csv
+log:  out/redeliver_log.jsonl
+file for Kalkulio: out/for_kalkulio.csv
 (exit 0)

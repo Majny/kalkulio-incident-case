@@ -4,25 +4,24 @@
 
 Hi Marta,
 
-You are right, and I am sorry. Your number is correct: 2,474 of the 4,000 leads got a status from us yesterday.
+You are right, and I am sorry: 2,474 of the 4,000 leads got a status from us yesterday.
 
-What happened: between 11:02 and 13:05 Warsaw time, one of our internal services kept running out of memory. The bot still called every lead within 2.5 minutes, but the step that sends you the result depended on that service and did not retry. 1,611 results never left our side. 140 were resent by hand at 15:04.
+What happened: between 11:02 and 13:05 your time, one of our internal services kept running out of memory. Calls continued, but the step that sends you results depended on that service and did not retry.
 
-The 5,121 figure counts internal writes in our system, not statuses sent to you. It should not have been quoted, and we will correct it with your CEO ourselves.
+The 5,121 figure counts internal writes in our system, not statuses sent to you. It was wrong to quote it; we will correct it with your CEO.
 
 Of your 1,526 leads without a status:
 - 1,223 were called, but the result did not reach you.
-- 303 arrived after 18:58, when dialing stops, and are being called this morning as usual.
+- 303 arrived after our last call slot and are being called this morning.
 
 What we are doing:
-1. Today you get a file with the missing results. 309 of those people are interested and 95 asked for a callback, so your team can start there.
-2. Tomorrow at 07:00, before your team starts, we load the 1,286 missing results into your CRM: the 1,223 plus 63 leads where only the first call attempt reached you. Tell me if another time suits better.
-3. Our manual resend put an older status on 7 leads. They are in the file and need a manual fix on your side.
-4. This week: automatic retry for result delivery, an alert when it fails, and a daily check of our numbers against yours.
+1. Today you get a file with the missing results: 309 interested and 95 callback requests, start there.
+2. Tomorrow at 07:00, before your team starts, we load the 1,286 missing results into your CRM (1,223 plus 63 second calls). One question: would our result replace an outcome your agents recorded yesterday? If so, we send only the file.
+3. Our manual resend put an older status on 7 leads; they are marked in the file.
+4. By Friday: automatic retry, an alert on any failed delivery, and a daily check of our numbers against yours. Until then, we check for failed deliveries every hour while you are calling and resend them.
 
-On the credit note: we will propose one. I don't think 275k reflects what was lost, and I will walk you through our numbers tomorrow.
-
-On household insurance and selling on the call, I will bring concrete proposals tomorrow.
+One ask: from today, please send leads in batches every 2 minutes again. One-by-one pushes at peak overloaded our service. With that and our retry live by Friday, household can start Monday. Selling on the call: we can scope quoting plus an SMS payment link, without card details. Tomorrow: details, and a credit note proposal based on what was actually lost.
 
 Best regards,
 Jakub
+Forward Deployed Engineer, Born Digital

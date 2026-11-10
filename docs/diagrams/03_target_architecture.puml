@@ -1,0 +1,31 @@
+@startuml 03_target_architecture
+title After the fixes (numbers = fix # in DIAGNOSIS.md)
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+
+node "Kalkulio" {
+  component "CRM\n(7) shows newest call" as crm
+  component "Status API" as kapi
+}
+node "Born Digital platform" {
+  component "outbound-api\n(5) atomic append\n(4) OOM + restart alerts" as oapi
+  component "Dialer + voicebot" as bot
+  package "Status delivery (2), then platform default" {
+    component "Status step\npayload from flow data" as step
+    queue "Outbox\nretry with backoff" as outbox
+    component "Daily reconciliation\nour log vs GET /callbot/leads" as recon
+  }
+  component "Alerting" as alert
+}
+
+crm --> oapi : (3) batched push every 2 min
+oapi --> bot
+bot --> step : call result
+step --> outbox
+outbox --> kapi : POST, newest attempt only
+outbox ..> alert : delivery failed after retries
+recon ..> kapi : GET
+recon ..> alert : count mismatch
+kapi --> crm
+@enduml

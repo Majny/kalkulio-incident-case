@@ -1,0 +1,30 @@
+@startuml 02_incident_sequence
+title One lead during the outage (09:02-11:05 UTC)
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+autonumber
+
+participant "Kalkulio" as K
+participant "outbound-api" as O
+participant "Dialer + voicebot" as B
+participant "Status step" as S
+participant "Kalkulio status API" as A
+
+K -> O : push lead
+O -> O : load campaign doc, append, save
+O -> B : dial (within 2.5 min)
+B -> B : call ends with a result
+B -> O : PATCH call result
+alt pod OOMKilled / restarting
+  O --x B : connection failed
+  S -> O : reload call record
+  O --x S : socket hang up / refused /\nconnection failed
+  S -> S : log "status delivery skipped"\n(no retry)
+  note over A : Kalkulio never hears about this call
+else pod healthy
+  S -> O : reload call record
+  O --> S : record
+  S -> A : POST status
+  A --> S : accepted
+end
+@enduml

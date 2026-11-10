@@ -15,6 +15,7 @@ leads with no call at all: 303
   of which created >= 17:00 UTC (19:00 Warsaw): 296
   earliest createdAt among them: 2026-09-29T16:58:14.894Z
   latest createdAt of a called lead: 2026-09-29T16:57:33.226Z
+last call started: 2026-09-29T16:59:11.984Z
 last status POST in log: 2026-09-29T17:01:29.657Z
 
 == Number 2: 2,474 leads with a status
@@ -27,6 +28,7 @@ leads called but no status delivered: 1223
 successful internal PATCH call-result to outbound-api: 5121
   IN_PROGRESS: 2548  final result: 2573
 failed internal PATCH: 3185
+  IN_PROGRESS: 1605  final result: 1580 (our campaign store has no final result for these calls)
 calls (conversations): 4153
 status POSTs to Kalkulio: bot ok 2542  bot skipped (failed) 1611  manual resend 140
 successful POSTs to Kalkulio total: 2682
@@ -67,7 +69,8 @@ leads whose newest status never arrived: 1286
   of which lead shows an older attempt: 63
   by status: {'ANSWERED_NOT_INTERESTED': 419, 'ANSWERED_INTERESTED': 309, 'NO_ANSWER': 195, 'VOICEMAIL': 169, 'CALLBACK_REQUESTED': 95, 'BUSY': 53, 'WRONG_NUMBER': 46}
 older undelivered statuses superseded by a newer delivered one (do not send): 185
-leads 'with status' that show the wrong one: 63 older attempt + overwritten = 70
+leads 'with status' that show an older attempt: 63 + 7 overwritten = 70; visible status value differs: 50 + 5 = 55
+bridge, failed deliveries (attempts): 1611 = 140 resent by hand + 1223 leads with no status + 63 newest attempts lost + 185 superseded = 1611
 
 == Unrelated: update_entity warnings
 count: 97  errors: {"HTTP 400 {'body.metaData': 'Input should be a valid dictionary'}": 97}
@@ -98,8 +101,8 @@ median normal hour: 222  peak 09-10 avg: 885.0
 minutes: median 1.6  max 2.5
 
 == Contract metrics measured on 29 Sep
-1 status delivery: 2542/4153 = 61.2% within 15 min of call end  (bot delivery latency max 10.5 s)
-2 speed to first call: 3697/3697 = 100.0% within 5 min (leads 08:00-18:58 Warsaw)
+1 status delivery: 2283/3697 = 61.8% of called leads got their newest status within 15 min of call end  (bot delivery latency max 10.5 s)
+2 speed to first call: 3685/3685 = 100.0% within 5 min (leads pushed 08:00-18:55 Warsaw)
 
 == Business: day of 29 Sep
 call attempts: 4153  per called lead: 1.123
@@ -110,6 +113,7 @@ interested leads: 938 = 40.4% of contacted
 expected margin per interested lead: 16.20 PLN
 per month (21 days): fees 209,311  saving 619,212
 README rates: extra contacts/day vs call center = 4000 x 13pp = 520 -> extra interested 210 -> extra margin 3,406 PLN/day, 71,524/month
+household upside: 2500 x 1.123 attempts x 2.4 x 21 = 141,541 PLN/month in attempt fees
 
 == Business: exposure
 Marta: 1526 x 180 = 274680
@@ -118,7 +122,8 @@ interested leads whose status arrived late via manual resend: 35
 interested leads hidden by the manual overwrite: 2
 upper bound if every one of them is lost: 311 x 16.20 = 5,038.20 PLN
 incl. late manual ones: 346 x 16.20 = 5,605.20 PLN
-callback-requested leads whose status never arrived: 95
+callback-requested leads whose status never arrived: 95  hidden by the overwrite: 2
+sensitivity, callbacks converting like interested: 408 x 16.20 = 6,609.60 PLN
 attempts with failed delivery: 1611 x 2.4 = 3,866.40 PLN
 whole day's attempt fees: 9,967.20 PLN
 

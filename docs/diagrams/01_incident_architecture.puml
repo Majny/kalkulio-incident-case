@@ -1,0 +1,45 @@
+@startuml 01_incident_architecture
+title 29 Sep: where it broke
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+
+actor "Kalkulio ops\n(Marta's team)" as ops
+node "Kalkulio" {
+  component "CRM" as crm
+  component "Status API\nPOST /callbot/calls\nGET /callbot/leads/{id}" as kapi
+}
+
+node "Born Digital platform" {
+  package "Core product (shared by many clients)" {
+    component "outbound-api\n1 replica, 800Mi\nhandle_partial_update_campaign" as oapi
+    database "Campaign document\n(~10k numbers)" as camp
+  }
+  component "Dialer" as dialer
+  package "Per client (ours, Engagement)" {
+    component "Voicebot flow" as bot
+    component "Status step\n(no retry)" as step
+  }
+}
+
+crm --> oapi : push lead\n(per lead since 25 Sep,\n~890/h at 09-11 UTC)
+oapi --> camp : load whole doc,\nappend 1, save
+oapi --> dialer
+dialer --> bot : call
+bot --> oapi : 1. PATCH call result
+step --> oapi : 2. reload call record
+step --> kapi : 3. POST status
+kapi --> crm
+ops --> crm : works the leads
+
+note right of oapi
+  <b>Outage root cause</b>
+  memory grows with concurrent pushes
+  14 OOMKills 08:55-11:05
+end note
+note bottom of step
+  <b>Data loss root cause</b>
+  step 2 failed -> "status delivery skipped"
+  1,611 deliveries lost, payload was already in the flow
+end note
+@enduml
